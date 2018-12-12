@@ -15,21 +15,46 @@
  */
 package io.zeebe.gateway.cmd;
 
+import com.google.protobuf.Any;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import io.zeebe.gateway.impl.broker.response.BrokerRejection;
 
 /** A client command was rejected by the broker. */
-public class ClientCommandRejectedException extends ClientException {
+public class ClientCommandRejectedException extends ClientException implements StatusError {
   private static final long serialVersionUID = 1L;
 
+  private final BrokerRejection rejection;
+
   public ClientCommandRejectedException(BrokerRejection rejection) {
-    this(rejection.getMessage());
+    super(rejection.getMessage());
+    this.rejection = rejection;
   }
 
-  public ClientCommandRejectedException(String errorMessage) {
-    super(errorMessage);
+  public ClientCommandRejectedException(BrokerRejection rejection, Throwable cause) {
+    super(rejection.getMessage(), cause);
+    this.rejection = rejection;
   }
 
-  public ClientCommandRejectedException(String errorMessage, Throwable cause) {
-    super(errorMessage, cause);
+  @Override
+  public Status toStatus() {
+    return Status.newBuilder()
+        .setCode(getStatusCode().getNumber())
+        .setMessage(getMessage())
+        .setDetails(0, Any.pack(rejection.toRejectionInfo()))
+        .build();
+  }
+
+  private Code getStatusCode() {
+    switch (rejection.getType()) {
+      case BAD_VALUE:
+        return Code.INVALID_ARGUMENT;
+      case NOT_APPLICABLE:
+        return Code.FAILED_PRECONDITION;
+      case PROCESSING_ERROR:
+        return Code.INTERNAL;
+      default:
+        return Code.UNKNOWN;
+    }
   }
 }

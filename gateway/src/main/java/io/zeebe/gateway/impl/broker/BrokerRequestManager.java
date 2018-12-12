@@ -19,6 +19,7 @@ import io.zeebe.gateway.cmd.BrokerErrorException;
 import io.zeebe.gateway.cmd.ClientCommandRejectedException;
 import io.zeebe.gateway.cmd.ClientException;
 import io.zeebe.gateway.cmd.ClientOutOfMemoryException;
+import io.zeebe.gateway.cmd.UnknownBrokerResponseException;
 import io.zeebe.gateway.impl.ErrorResponseHandler;
 import io.zeebe.gateway.impl.broker.cluster.BrokerClusterState;
 import io.zeebe.gateway.impl.broker.cluster.BrokerTopologyManagerImpl;
@@ -107,8 +108,7 @@ public class BrokerRequestManager extends Actor {
               } else if (response.isError()) {
                 errorConsumer.accept(response.getError());
               } else {
-                throwableConsumer.accept(
-                    new ClientException("Unknown response received: " + response));
+                throwableConsumer.accept(new UnknownBrokerResponseException(response));
               }
             } else {
               throwableConsumer.accept(error);
@@ -241,7 +241,7 @@ public class BrokerRequestManager extends Actor {
         if (partitionId == BrokerClusterState.PARTITION_ID_NULL) {
           // should not happen as the request manager fetches the topology before starting the
           // request
-          throw new IllegalStateException("Not partitions available");
+          throw new IllegalStateException("No partitions available");
         }
         request.setPartitionId(partitionId);
       }

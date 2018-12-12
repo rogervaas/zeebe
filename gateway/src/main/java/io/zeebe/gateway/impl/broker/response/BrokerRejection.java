@@ -15,6 +15,8 @@
  */
 package io.zeebe.gateway.impl.broker.response;
 
+import io.zeebe.gateway.protocol.GatewayOuterClass.RejectionInfo;
+import io.zeebe.gateway.protocol.GatewayOuterClass.RejectionInfo.Type;
 import io.zeebe.protocol.clientapi.RejectionType;
 import io.zeebe.protocol.intent.Intent;
 import io.zeebe.util.buffer.BufferUtil;
@@ -50,6 +52,34 @@ public class BrokerRejection {
 
   public String getMessage() {
     return message;
+  }
+
+  public RejectionInfo toRejectionInfo() {
+    return RejectionInfo.newBuilder()
+        .setIntent(intent.toString())
+        .setKey(key)
+        .setReason(reason)
+        .setType(mapRejectionType())
+        .build();
+  }
+
+  private Type mapRejectionType() {
+    Type type;
+    switch (this.type) {
+      case NOT_APPLICABLE:
+        type = Type.NOT_APPLICABLE;
+        break;
+      case PROCESSING_ERROR:
+        type = Type.PROCESSING_ERROR;
+        break;
+      case BAD_VALUE:
+        type = Type.BAD_VALUE;
+        break;
+      default:
+        type = Type.UNRECOGNIZED;
+        break;
+    }
+    return type;
   }
 
   private String buildRejectionMessage() {

@@ -15,38 +15,44 @@
  */
 package io.zeebe.gateway.cmd;
 
+import com.google.protobuf.Any;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import io.zeebe.gateway.impl.broker.response.BrokerError;
 import io.zeebe.protocol.clientapi.ErrorCode;
 
-public class BrokerErrorException extends ClientException {
+public class BrokerErrorException extends ClientException implements StatusError {
   private static final long serialVersionUID = 1L;
 
   public static final String ERROR_MESSAGE_FORMAT = "Request exception (%s): %s%n";
 
-  protected final ErrorCode errorCode;
-  protected final String errorMessage;
+  private final BrokerError error;
 
-  public BrokerErrorException(BrokerError brokerError) {
-    this(brokerError.getCode(), brokerError.getMessage());
-  }
-
-  public BrokerErrorException(final ErrorCode errorCode, final String errorMessage) {
-    this(errorCode, errorMessage, null);
-  }
-
-  public BrokerErrorException(
-      final ErrorCode errorCode, final String errorMessage, Throwable cause) {
-    super(String.format(ERROR_MESSAGE_FORMAT, errorCode, errorMessage), cause);
-
-    this.errorCode = errorCode;
-    this.errorMessage = errorMessage;
+  public BrokerErrorException(BrokerError error) {
+    super(String.format(ERROR_MESSAGE_FORMAT, error.getCode(), error.getMessage()));
+    this.error = error;
   }
 
   public ErrorCode getErrorCode() {
-    return errorCode;
+    return error.getCode();
   }
 
   public String getErrorMessage() {
-    return errorMessage;
+    return error.getMessage();
+  }
+
+  @Override
+  public Status toStatus() {
+    return Status.newBuilder()
+        .setCode(getStatusCode().getNumber())
+        .setMessage(getMessage())
+        .setDetails(0, Any.pack(error.toErrorInfo()))
+        .build();
+  }
+
+  private Code getStatusCode() {
+    switch (error.getCode()) {
+      case REQUEST_PROCESSING_FAILURE:
+    }
   }
 }

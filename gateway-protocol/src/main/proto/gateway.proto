@@ -223,3 +223,32 @@ service Gateway {
   rpc ResolveIncident (ResolveIncidentRequest) returns (ResolveIncidentResponse) {
   }
 }
+
+message RejectionInfo {
+  Type type = 1;
+  string intent = 2;
+  string reason = 3;
+  int64 key = 4;
+
+  enum Type {
+    BAD_VALUE = 0;
+    NOT_APPLICABLE = 1;
+    PROCESSING_ERROR = 2;
+  }
+}
+
+message ErrorInfo {
+  string message = 1;
+  Code code = 2;
+
+  enum Code {
+    MESSAGE_NOT_SUPPORTED = 0;
+    PARTITION_NOT_FOUND = 1;
+    REQUEST_WRITE_FAILURE = 2;
+    INVALID_CLIENT_VERSION = 3;
+    REQUEST_TIMEOUT = 4;
+    REQUEST_PROCESSING_FAILURE = 5;
+    INVALID_MESSAGE = 6;
+    NOT_FOUND = 7;
+  }
+}

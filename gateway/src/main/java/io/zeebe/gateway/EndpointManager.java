@@ -17,6 +17,7 @@ package io.zeebe.gateway;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import io.zeebe.gateway.ResponseMapper.BrokerResponseMapper;
 import io.zeebe.gateway.impl.broker.BrokerClient;
@@ -223,15 +224,20 @@ public class EndpointManager extends GatewayGrpc.GatewayImplBase {
         error -> streamObserver.onError(convertThrowable(error)));
   }
 
-  private static StatusRuntimeException convertThrowable(final Throwable cause) {
+  private static StatusRuntimeException convertThrowable(final Throwable throwable) {
+    return StatusProto.toStatusRuntimeException(mapError(throwable));
     final String description;
 
-    if (cause instanceof ExecutionException) {
-      description = cause.getCause().getMessage();
+    if (throwable instanceof ExecutionException) {
+      description = throwable.getCause().getMessage();
     } else {
-      description = cause.getMessage();
+      description = throwable.getMessage();
     }
 
-    return Status.INTERNAL.augmentDescription(description).withCause(cause).asRuntimeException();
+    return Status.INTERNAL.augmentDescription(description).withCause(throwable).asRuntimeException();
+  }
+
+  private static com.google.rpc.Status mapError(Throwable error) {
+    if (error instanceof )
   }
 }

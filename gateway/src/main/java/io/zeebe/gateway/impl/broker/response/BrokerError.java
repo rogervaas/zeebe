@@ -15,6 +15,8 @@
  */
 package io.zeebe.gateway.impl.broker.response;
 
+import io.zeebe.gateway.protocol.GatewayOuterClass.ErrorInfo;
+import io.zeebe.gateway.protocol.GatewayOuterClass.ErrorInfo.Code;
 import io.zeebe.protocol.clientapi.ErrorCode;
 import io.zeebe.protocol.impl.encoding.ErrorResponse;
 import io.zeebe.util.buffer.BufferUtil;
@@ -44,5 +46,24 @@ public class BrokerError {
   @Override
   public String toString() {
     return "BrokerError{" + "code=" + code + ", message='" + message + '\'' + '}';
+  }
+
+  public ErrorInfo toErrorInfo() {
+    return ErrorInfo.newBuilder().setCode(mapErrorCode()).setMessage(message).build();
+  }
+
+  private Code mapErrorCode() {
+    switch (code) {
+      case INVALID_MESSAGE: return Code.INVALID_MESSAGE;
+      case NOT_FOUND: return Code.NOT_FOUND;
+      case REQUEST_TIMEOUT: return Code.REQUEST_TIMEOUT;
+      case PARTITION_NOT_FOUND: return Code.PARTITION_NOT_FOUND;
+      case MESSAGE_NOT_SUPPORTED: return Code.MESSAGE_NOT_SUPPORTED;
+      case REQUEST_WRITE_FAILURE: return Code.REQUEST_WRITE_FAILURE;
+      case INVALID_CLIENT_VERSION: return Code.INVALID_CLIENT_VERSION;
+      case REQUEST_PROCESSING_FAILURE: return Code.REQUEST_PROCESSING_FAILURE;
+      default:
+        return Code.UNRECOGNIZED;
+    }
   }
 }
