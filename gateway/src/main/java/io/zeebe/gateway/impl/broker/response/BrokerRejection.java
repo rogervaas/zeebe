@@ -64,7 +64,7 @@ public class BrokerRejection {
   }
 
   private Type mapRejectionType() {
-    Type type;
+    final Type type;
     switch (this.type) {
       case NOT_APPLICABLE:
         type = Type.NOT_APPLICABLE;

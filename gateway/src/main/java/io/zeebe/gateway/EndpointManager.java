@@ -20,6 +20,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import io.zeebe.gateway.ResponseMapper.BrokerResponseMapper;
+import io.zeebe.gateway.cmd.StatusError;
 import io.zeebe.gateway.impl.broker.BrokerClient;
 import io.zeebe.gateway.impl.broker.cluster.BrokerTopologyManager;
 import io.zeebe.gateway.impl.broker.request.BrokerRequest;
@@ -210,7 +211,8 @@ public class EndpointManager extends GatewayGrpc.GatewayImplBase {
     try {
       brokerRequest = requestMapper.apply(grpcRequest);
     } catch (Exception e) {
-      streamObserver.onError(convertThrowable(e));
+      final StatusRuntimeException status = convertThrowable(e);
+      streamObserver.onError(status);
       return;
     }
 
@@ -221,23 +223,25 @@ public class EndpointManager extends GatewayGrpc.GatewayImplBase {
           streamObserver.onNext(grpcResponse);
           streamObserver.onCompleted();
         },
-        error -> streamObserver.onError(convertThrowable(error)));
+        error -> {
+          final StatusRuntimeException status = convertThrowable(error);
+          streamObserver.onError(status);
+        });
   }
 
-  private static StatusRuntimeException convertThrowable(final Throwable throwable) {
-    return StatusProto.toStatusRuntimeException(mapError(throwable));
-    final String description;
-
-    if (throwable instanceof ExecutionException) {
-      description = throwable.getCause().getMessage();
-    } else {
-      description = throwable.getMessage();
+  private static StatusRuntimeException convertThrowable(Throwable error) {
+    if (error instanceof StatusError) {
+      final com.google.rpc.Status status = ((StatusError) error).toStatus();
+      return StatusProto.toStatusRuntimeException(status);
     }
 
-    return Status.INTERNAL.augmentDescription(description).withCause(throwable).asRuntimeException();
-  }
+    if (error instanceof ExecutionException) {
+      return convertThrowable(error.getCause());
+    }
 
-  private static com.google.rpc.Status mapError(Throwable error) {
-    if (error instanceof )
+    return Status.INTERNAL
+        .withDescription(error.getMessage())
+        .withCause(error)
+        .asRuntimeException();
   }
 }

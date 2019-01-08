@@ -16,11 +16,12 @@
 
 package io.zeebe.client.impl;
 
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
+import com.google.rpc.Status;
+import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import io.zeebe.client.api.ZeebeFuture;
-import io.zeebe.client.cmd.ClientException;
+import io.zeebe.client.cmd.CommandException;
+import io.zeebe.client.cmd.InternalClientException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -46,15 +47,9 @@ public class ZeebeClientFutureImpl<ClientResponse, BrokerResponse>
     try {
       return get();
     } catch (final ExecutionException e) {
-      final Throwable cause = e.getCause();
-      if (cause instanceof StatusRuntimeException) {
-        final Status status = ((StatusRuntimeException) cause).getStatus();
-        throw new ClientException(status.getDescription(), e);
-      } else {
-        throw new ClientException(cause.getMessage(), e);
-      }
+      return handleCommandExecutionException(e);
     } catch (final InterruptedException e) {
-      throw new ClientException("Failed to receive response", e);
+      throw new InternalClientException(e);
     }
   }
 
@@ -62,8 +57,10 @@ public class ZeebeClientFutureImpl<ClientResponse, BrokerResponse>
   public ClientResponse join(final long timeout, final TimeUnit unit) {
     try {
       return get(timeout, unit);
-    } catch (final InterruptedException | ExecutionException | TimeoutException e) {
-      throw new RuntimeException(e);
+    } catch (final ExecutionException e) {
+      return handleCommandExecutionException(e);
+    } catch (final InterruptedException | TimeoutException e) {
+      throw new InternalClientException(e);
     }
   }
 
@@ -84,5 +81,15 @@ public class ZeebeClientFutureImpl<ClientResponse, BrokerResponse>
   @Override
   public void onCompleted() {
     // do nothing as we don't support streaming
+  }
+
+  private ClientResponse handleCommandExecutionException(ExecutionException e) {
+    final Status status = StatusProto.fromThrowable(e);
+    if (status != null) {
+      throw new CommandException(status);
+    } else {
+      final Throwable source = e.getCause() == null ? e : e.getCause();
+      throw new InternalClientException(source);
+    }
   }
 }

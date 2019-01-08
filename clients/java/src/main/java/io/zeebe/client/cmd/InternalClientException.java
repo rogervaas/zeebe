@@ -17,6 +17,7 @@ package io.zeebe.client.cmd;
 
 /** Exception which is thrown on internal errors inside the client itself. */
 public class InternalClientException extends ClientException {
+  private static final long serialVersionUID = 496870279928901115L;
 
   public InternalClientException(String message) {
     super(message);
@@ -24,5 +25,9 @@ public class InternalClientException extends ClientException {
 
   public InternalClientException(String message, Throwable cause) {
     super(message, cause);
+  }
+
+  public InternalClientException(Throwable wrapped) {
+    super(wrapped);
   }
 }

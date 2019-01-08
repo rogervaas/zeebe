@@ -21,6 +21,7 @@ import io.zeebe.client.api.clients.JobClient;
 import io.zeebe.client.api.response.ActivatedJob;
 import io.zeebe.client.api.subscription.JobHandler;
 import io.zeebe.client.api.subscription.JobWorker;
+import io.zeebe.client.cmd.CommandException;
 import java.time.Duration;
 import java.util.Scanner;
 
@@ -66,7 +67,15 @@ public class JobWorkerCreator {
               job.getHeaders(),
               job.getPayload()));
 
-      client.newCompleteCommand(job.getKey()).send().join();
+      try {
+        client.newCompleteCommand(35).send().join();
+      } catch (CommandException e) {
+        System.out.println(e.toString());
+        System.out.println("========================================================");
+        System.out.println(e.getDetails());
+      } catch (RuntimeException e) {
+        e.printStackTrace();
+      }
     }
   }
 

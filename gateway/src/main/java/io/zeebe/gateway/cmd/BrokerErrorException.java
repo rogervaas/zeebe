@@ -46,13 +46,44 @@ public class BrokerErrorException extends ClientException implements StatusError
     return Status.newBuilder()
         .setCode(getStatusCode().getNumber())
         .setMessage(getMessage())
-        .setDetails(0, Any.pack(error.toErrorInfo()))
+        .addDetails(Any.pack(error.toErrorInfo()))
         .build();
   }
 
   private Code getStatusCode() {
+    final Code code;
     switch (error.getCode()) {
       case REQUEST_PROCESSING_FAILURE:
+        code = Code.INTERNAL;
+        break;
+      case INVALID_CLIENT_VERSION:
+        code = Code.FAILED_PRECONDITION;
+        break;
+      case REQUEST_WRITE_FAILURE: // seems unused
+        code = Code.UNKNOWN;
+        break;
+      case MESSAGE_NOT_SUPPORTED:
+        code = Code.UNIMPLEMENTED;
+        break;
+        // NOT_FOUND probably does not apply here as the partition is not the resource or operation
+        // requested, though that's arguable.
+      case PARTITION_NOT_FOUND:
+        code = Code.FAILED_PRECONDITION;
+        break;
+      case REQUEST_TIMEOUT:
+        code = Code.DEADLINE_EXCEEDED;
+        break;
+      case NOT_FOUND:
+        code = Code.NOT_FOUND;
+        break;
+      case INVALID_MESSAGE:
+        code = Code.INTERNAL;
+        break;
+      default:
+        code = Code.UNKNOWN;
+        break;
     }
+
+    return code;
   }
 }

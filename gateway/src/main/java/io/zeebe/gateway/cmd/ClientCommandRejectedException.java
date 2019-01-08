@@ -41,7 +41,7 @@ public class ClientCommandRejectedException extends ClientException implements S
     return Status.newBuilder()
         .setCode(getStatusCode().getNumber())
         .setMessage(getMessage())
-        .setDetails(0, Any.pack(rejection.toRejectionInfo()))
+        .addDetails(Any.pack(rejection.toRejectionInfo()))
         .build();
   }
 
