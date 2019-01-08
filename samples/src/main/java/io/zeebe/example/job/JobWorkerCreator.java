@@ -21,10 +21,17 @@ import io.zeebe.client.api.clients.JobClient;
 import io.zeebe.client.api.response.ActivatedJob;
 import io.zeebe.client.api.subscription.JobHandler;
 import io.zeebe.client.api.subscription.JobWorker;
+import io.zeebe.client.cmd.BrokerException;
+import io.zeebe.client.cmd.ClientException;
+import io.zeebe.client.cmd.RejectionException;
 import java.time.Duration;
 import java.util.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JobWorkerCreator {
+  private static final Logger LOG = LoggerFactory.getLogger(JobWorkerCreator.class);
+
   public static void main(final String[] args) {
     final String broker = "127.0.0.1:26500";
 
@@ -66,7 +73,15 @@ public class JobWorkerCreator {
               job.getHeaders(),
               job.getPayload()));
 
-      client.newCompleteCommand(job.getKey()).send().join();
+      try {
+        client.newCompleteCommand(job.getKey()).send().join();
+      } catch (BrokerException e) {
+        LOG.error("Broker returned an error to the gateway", e);
+      } catch (RejectionException e) {
+        LOG.error("Command was rejected", e);
+      } catch (ClientException e) {
+        LOG.error("Received unexpected client exception", e);
+      }
     }
   }
 

@@ -26,6 +26,7 @@ import io.zeebe.gateway.protocol.GatewayOuterClass.BrokerInfo;
 import io.zeebe.gateway.protocol.GatewayOuterClass.BrokerInfo.Builder;
 import io.zeebe.gateway.protocol.GatewayOuterClass.CancelWorkflowInstanceResponse;
 import io.zeebe.gateway.protocol.GatewayOuterClass.CompleteJobResponse;
+import io.zeebe.gateway.protocol.GatewayOuterClass.CreateWorkflowInstanceInfo;
 import io.zeebe.gateway.protocol.GatewayOuterClass.CreateWorkflowInstanceResponse;
 import io.zeebe.gateway.protocol.GatewayOuterClass.DeployWorkflowResponse;
 import io.zeebe.gateway.protocol.GatewayOuterClass.FailJobResponse;
@@ -36,6 +37,7 @@ import io.zeebe.gateway.protocol.GatewayOuterClass.Partition;
 import io.zeebe.gateway.protocol.GatewayOuterClass.Partition.PartitionBrokerRole;
 import io.zeebe.gateway.protocol.GatewayOuterClass.PublishMessageResponse;
 import io.zeebe.gateway.protocol.GatewayOuterClass.ResolveIncidentResponse;
+import io.zeebe.gateway.protocol.GatewayOuterClass.TopologyInfo;
 import io.zeebe.gateway.protocol.GatewayOuterClass.TopologyResponse;
 import io.zeebe.gateway.protocol.GatewayOuterClass.UpdateJobRetriesResponse;
 import io.zeebe.gateway.protocol.GatewayOuterClass.UpdateWorkflowInstancePayloadResponse;
@@ -74,11 +76,12 @@ public class ResponseMapper {
   }
 
   public static TopologyResponse toTopologyResponse(long key, TopologyResponseDto brokerResponse) {
+    final TopologyInfo.Builder topologyInfoBuilder =
+        TopologyInfo.newBuilder()
+            .setClusterSize(brokerResponse.getClusterSize())
+            .setPartitionsCount(brokerResponse.getPartitionsCount())
+            .setReplicationFactor(brokerResponse.getReplicationFactor());
     final TopologyResponse.Builder topologyResponseBuilder = TopologyResponse.newBuilder();
-    topologyResponseBuilder
-        .setClusterSize(brokerResponse.getClusterSize())
-        .setPartitionsCount(brokerResponse.getPartitionsCount())
-        .setReplicationFactor(brokerResponse.getReplicationFactor());
 
     final ArrayList<BrokerInfo> infos = new ArrayList<>();
 
@@ -105,8 +108,8 @@ public class ResponseMapper {
               infos.add(brokerInfo.build());
             });
 
-    topologyResponseBuilder.addAllBrokers(infos);
-    return topologyResponseBuilder.build();
+    topologyInfoBuilder.addAllBrokers(infos);
+    return TopologyResponse.newBuilder().setInfo(topologyInfoBuilder.build()).build();
   }
 
   public static DeployWorkflowResponse toDeployWorkflowResponse(
@@ -147,12 +150,15 @@ public class ResponseMapper {
 
   public static CreateWorkflowInstanceResponse toCreateWorkflowInstanceResponse(
       long key, WorkflowInstanceRecord brokerResponse) {
-    return CreateWorkflowInstanceResponse.newBuilder()
-        .setWorkflowKey(brokerResponse.getWorkflowKey())
-        .setBpmnProcessId(bufferAsString(brokerResponse.getBpmnProcessId()))
-        .setVersion(brokerResponse.getVersion())
-        .setWorkflowInstanceKey(brokerResponse.getWorkflowInstanceKey())
-        .build();
+    final CreateWorkflowInstanceInfo info =
+        CreateWorkflowInstanceInfo.newBuilder()
+            .setWorkflowKey(brokerResponse.getWorkflowKey())
+            .setBpmnProcessId(bufferAsString(brokerResponse.getBpmnProcessId()))
+            .setVersion(brokerResponse.getVersion())
+            .setWorkflowInstanceKey(brokerResponse.getWorkflowInstanceKey())
+            .build();
+
+    return CreateWorkflowInstanceResponse.newBuilder().setInfo(info).build();
   }
 
   public static CancelWorkflowInstanceResponse toCancelWorkflowInstanceResponse(

@@ -16,7 +16,10 @@
 package io.zeebe.client.impl.workflow;
 
 import io.zeebe.client.api.events.WorkflowInstanceEvent;
+import io.zeebe.client.cmd.BrokerException;
+import io.zeebe.client.cmd.RejectionException;
 import io.zeebe.gateway.protocol.GatewayOuterClass;
+import io.zeebe.gateway.protocol.GatewayOuterClass.CreateWorkflowInstanceInfo;
 
 public class CreateWorkflowInstanceResponseImpl implements WorkflowInstanceEvent {
 
@@ -27,10 +30,19 @@ public class CreateWorkflowInstanceResponseImpl implements WorkflowInstanceEvent
 
   public CreateWorkflowInstanceResponseImpl(
       GatewayOuterClass.CreateWorkflowInstanceResponse response) {
-    this.workflowKey = response.getWorkflowKey();
-    this.bpmnProcessId = response.getBpmnProcessId();
-    this.version = response.getVersion();
-    this.workflowInstanceKey = response.getWorkflowInstanceKey();
+    if (response.hasError()) {
+      throw new BrokerException(response.getError());
+    }
+
+    if (response.hasRejection()) {
+      throw new RejectionException(response.getRejection());
+    }
+
+    final CreateWorkflowInstanceInfo info = response.getInfo();
+    this.workflowKey = info.getWorkflowKey();
+    this.bpmnProcessId = info.getBpmnProcessId();
+    this.version = info.getVersion();
+    this.workflowInstanceKey = info.getWorkflowInstanceKey();
   }
 
   @Override

@@ -17,6 +17,8 @@ package io.zeebe.client.impl;
 
 import io.zeebe.client.api.commands.BrokerInfo;
 import io.zeebe.client.api.commands.Topology;
+import io.zeebe.client.cmd.BrokerException;
+import io.zeebe.gateway.protocol.GatewayOuterClass.TopologyInfo;
 import io.zeebe.gateway.protocol.GatewayOuterClass.TopologyResponse;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,11 +31,16 @@ public class TopologyImpl implements Topology {
   private final int replicationFactor;
 
   public TopologyImpl(final TopologyResponse response) {
+    if (response.hasError()) {
+      throw new BrokerException(response.getError());
+    }
+
+    final TopologyInfo info = response.getInfo();
     brokers =
-        response.getBrokersList().stream().map(BrokerInfoImpl::new).collect(Collectors.toList());
-    clusterSize = response.getClusterSize();
-    partitionsCount = response.getPartitionsCount();
-    replicationFactor = response.getReplicationFactor();
+        info.getBrokersList().stream().map(BrokerInfoImpl::new).collect(Collectors.toList());
+    clusterSize = info.getClusterSize();
+    partitionsCount = info.getPartitionsCount();
+    replicationFactor = info.getReplicationFactor();
   }
 
   @Override
