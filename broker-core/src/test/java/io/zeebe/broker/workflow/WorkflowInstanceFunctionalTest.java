@@ -30,11 +30,13 @@ import io.zeebe.exporter.record.value.JobRecordValue;
 import io.zeebe.exporter.record.value.WorkflowInstanceRecordValue;
 import io.zeebe.model.bpmn.Bpmn;
 import io.zeebe.model.bpmn.BpmnModelInstance;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.clientapi.ExecuteCommandResponseDecoder;
 import io.zeebe.protocol.clientapi.ValueType;
 import io.zeebe.protocol.impl.record.value.deployment.ResourceType;
 import io.zeebe.protocol.intent.DeploymentIntent;
 import io.zeebe.protocol.intent.JobIntent;
+import io.zeebe.protocol.intent.TimerIntent;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
 import io.zeebe.test.broker.protocol.clientapi.ClientApiRule;
 import io.zeebe.test.broker.protocol.clientapi.ExecuteCommandResponse;
@@ -42,6 +44,7 @@ import io.zeebe.test.broker.protocol.clientapi.PartitionTestClient;
 import io.zeebe.test.util.record.RecordingExporter;
 import java.io.File;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +113,7 @@ public class WorkflowInstanceFunctionalTest {
   }
 
   @Test
-  public void shouldOccureEndEvent() {
+  public void shouldOccurEndEvent() {
     // given
     testClient.deploy(Bpmn.createExecutableProcess(PROCESS_ID).startEvent().endEvent("foo").done());
 
@@ -350,5 +353,65 @@ public class WorkflowInstanceFunctionalTest {
     // then I can still start workflow instance (i.e. stream processor did not crash
     final long newWorkflowInstancekey = testClient.createWorkflowInstance(PROCESS_ID);
     assertThat(newWorkflowInstancekey).isGreaterThan(0);
+  }
+
+  @Test
+  public void shouldHaveCorrectBpmnElementTypeInRecord() {
+    // given
+    final BpmnModelInstance model =
+        Bpmn.createExecutableProcess(PROCESS_ID)
+            .startEvent("start")
+            .parallelGateway("split")
+            .serviceTask("task", t -> t.zeebeTaskType("task"))
+            .parallelGateway("merge")
+            .endEvent("end")
+            .moveToNode("split")
+            .intermediateCatchEvent("timer")
+            .timerWithDuration("PT1S")
+            .connectTo("merge")
+            .done();
+
+    brokerRule.getClock().pinCurrentTime();
+    testClient.deploy(model);
+
+    // when
+    testClient.createWorkflowInstance(PROCESS_ID);
+
+    assertThat(RecordingExporter.jobRecords(JobIntent.CREATED).exists()).isTrue();
+    testClient.completeJobOfType("task");
+
+    assertThat(RecordingExporter.timerRecords(TimerIntent.CREATED).exists()).isTrue();
+    brokerRule.getClock().addTime(Duration.ofSeconds(1));
+
+    // then
+    assertThat(RecordingExporter.workflowInstanceRecords())
+        .extracting(r -> r.getValue().getBpmnElementType())
+        .containsExactly(
+            BpmnElementType.PROCESS, // create
+            BpmnElementType.PROCESS, // process
+            BpmnElementType.PROCESS,
+            BpmnElementType.EVENT, // start
+            BpmnElementType.EVENT,
+            BpmnElementType.SEQUENCE_FLOW,
+            BpmnElementType.GATEWAY, // split
+            BpmnElementType.SEQUENCE_FLOW,
+            BpmnElementType.SEQUENCE_FLOW,
+            BpmnElementType.EVENT, // timer activating
+            BpmnElementType.TASK, // task ready
+            BpmnElementType.EVENT, // timer activated
+            BpmnElementType.TASK, // task activated
+            BpmnElementType.TASK, // task completing
+            BpmnElementType.TASK, // task completed
+            BpmnElementType.SEQUENCE_FLOW,
+            BpmnElementType.EVENT, // timer event occurred
+            BpmnElementType.EVENT, // timer triggering
+            BpmnElementType.EVENT, // timer triggered
+            BpmnElementType.SEQUENCE_FLOW,
+            BpmnElementType.GATEWAY, // merge
+            BpmnElementType.SEQUENCE_FLOW,
+            BpmnElementType.EVENT, // end
+            BpmnElementType.EVENT,
+            BpmnElementType.PROCESS, // process
+            BpmnElementType.PROCESS);
   }
 }

@@ -23,6 +23,7 @@ import io.zeebe.broker.workflow.processor.BpmnStepHandler;
 import io.zeebe.broker.workflow.state.IndexedRecord;
 import io.zeebe.broker.workflow.state.StoredRecord.Purpose;
 import io.zeebe.broker.workflow.state.WorkflowState;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
 import java.util.List;
@@ -67,6 +68,7 @@ public class TriggerStartEventHandler implements BpmnStepHandler<ExecutableFlowE
     }
 
     value.setScopeInstanceKey(scopeInstanceKey);
+    value.setBpmnElementType(BpmnElementType.EVENT);
 
     context.getOutput().appendNewEvent(WorkflowInstanceIntent.EVENT_TRIGGERING, value);
 

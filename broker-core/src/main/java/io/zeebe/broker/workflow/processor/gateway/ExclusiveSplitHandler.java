@@ -24,6 +24,7 @@ import io.zeebe.broker.workflow.processor.BpmnStepHandler;
 import io.zeebe.msgpack.el.CompiledJsonCondition;
 import io.zeebe.msgpack.el.JsonConditionException;
 import io.zeebe.msgpack.el.JsonConditionInterpreter;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.incident.ErrorType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
@@ -43,6 +44,7 @@ public class ExclusiveSplitHandler implements BpmnStepHandler<ExecutableExclusiv
 
       if (sequenceFlow != null) {
         value.setElementId(sequenceFlow.getId());
+        value.setBpmnElementType(BpmnElementType.SEQUENCE_FLOW);
         context.getOutput().appendNewEvent(WorkflowInstanceIntent.SEQUENCE_FLOW_TAKEN, value);
       } else {
         final String errorMessage = "All conditions evaluated to false and no default flow is set.";

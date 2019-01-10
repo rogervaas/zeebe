@@ -26,6 +26,7 @@ import io.zeebe.broker.workflow.processor.EventOutput;
 import io.zeebe.broker.workflow.state.DeployedWorkflow;
 import io.zeebe.broker.workflow.state.IndexedRecord;
 import io.zeebe.broker.workflow.state.WorkflowState;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
 import org.agrona.DirectBuffer;
@@ -58,6 +59,7 @@ public class CreateWorkflowInstanceOnStartEventHandler
           .setWorkflowKey(workflowDefinition.getKey())
           .setVersion(workflowDefinition.getVersion())
           .setElementId(bpmnId)
+          .setBpmnElementType(BpmnElementType.PROCESS)
           .setWorkflowInstanceKey(workflowInstanceKey);
 
       final EventOutput eventOutput = context.getOutput();

@@ -21,15 +21,18 @@ import io.zeebe.broker.workflow.model.element.ExecutableFlowNode;
 import io.zeebe.broker.workflow.model.element.ExecutableSequenceFlow;
 import io.zeebe.broker.workflow.processor.BpmnStepContext;
 import io.zeebe.broker.workflow.processor.BpmnStepHandler;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
 
 public class StartFlowNodeHandler implements BpmnStepHandler<ExecutableSequenceFlow> {
 
   private final WorkflowInstanceIntent nodeIntent;
+  private final BpmnElementType elementType;
 
-  public StartFlowNodeHandler(WorkflowInstanceIntent nodeIntent) {
+  public StartFlowNodeHandler(WorkflowInstanceIntent nodeIntent, BpmnElementType bpmnElementType) {
     this.nodeIntent = nodeIntent;
+    this.elementType = bpmnElementType;
   }
 
   @Override
@@ -39,6 +42,7 @@ public class StartFlowNodeHandler implements BpmnStepHandler<ExecutableSequenceF
 
     final WorkflowInstanceRecord value = context.getValue();
     value.setElementId(targetNode.getId());
+    value.setBpmnElementType(elementType);
 
     context.getOutput().appendNewEvent(nodeIntent, value);
   }

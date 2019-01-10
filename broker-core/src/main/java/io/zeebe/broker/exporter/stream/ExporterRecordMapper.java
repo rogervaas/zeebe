@@ -287,7 +287,8 @@ public class ExporterRecordMapper {
         record.getVersion(),
         record.getWorkflowKey(),
         record.getWorkflowInstanceKey(),
-        record.getScopeInstanceKey());
+        record.getScopeInstanceKey(),
+        record.getBpmnElementType());
   }
 
   private WorkflowInstanceSubscriptionRecordValue ofWorkflowInstanceSubscriptionRecord(

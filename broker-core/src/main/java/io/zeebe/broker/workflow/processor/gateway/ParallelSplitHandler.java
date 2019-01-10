@@ -22,6 +22,7 @@ import io.zeebe.broker.workflow.model.element.ExecutableSequenceFlow;
 import io.zeebe.broker.workflow.processor.BpmnStepContext;
 import io.zeebe.broker.workflow.processor.BpmnStepHandler;
 import io.zeebe.broker.workflow.processor.EventOutput;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
 
@@ -38,6 +39,7 @@ public class ParallelSplitHandler implements BpmnStepHandler<ExecutableFlowNode>
 
     for (final ExecutableSequenceFlow flow : element.getOutgoing()) {
       value.setElementId(flow.getId());
+      value.setBpmnElementType(BpmnElementType.SEQUENCE_FLOW);
       eventOutput.appendNewEvent(WorkflowInstanceIntent.SEQUENCE_FLOW_TAKEN, value);
 
       context.getFlowScopeInstance().spawnToken();

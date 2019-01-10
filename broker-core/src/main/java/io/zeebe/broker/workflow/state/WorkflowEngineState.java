@@ -145,6 +145,16 @@ public class WorkflowEngineState implements StreamProcessorLifecycleAware {
 
   private void removeElementInstance(long key, WorkflowInstanceRecord value) {
     elementInstanceState.removeInstance(key);
+
+    final long scopeInstanceKey = value.getScopeInstanceKey();
+    if (scopeInstanceKey >= 0) // i.e. not root scope
+    {
+      // TODO (saig0) #1613: Hack while we maintain both payload and variable concept in parallel;
+      // this overwrites the scope instance payload whenever an output mappings is applied
+      elementInstanceState
+          .getVariablesState()
+          .setVariablesLocalFromDocument(scopeInstanceKey, value.getPayload());
+    }
   }
 
   private void createNewElementInstance(

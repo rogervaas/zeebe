@@ -21,6 +21,7 @@ import io.zeebe.broker.workflow.model.element.ExecutableFlowNode;
 import io.zeebe.broker.workflow.model.element.ExecutableSequenceFlow;
 import io.zeebe.broker.workflow.processor.BpmnStepContext;
 import io.zeebe.broker.workflow.processor.BpmnStepHandler;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
 
@@ -33,6 +34,7 @@ public class TakeSequenceFlowHandler implements BpmnStepHandler<ExecutableFlowNo
 
     final WorkflowInstanceRecord value = context.getValue();
     value.setElementId(sequenceFlow.getId());
+    value.setBpmnElementType(BpmnElementType.SEQUENCE_FLOW);
 
     context.getOutput().appendNewEvent(WorkflowInstanceIntent.SEQUENCE_FLOW_TAKEN, value);
   }

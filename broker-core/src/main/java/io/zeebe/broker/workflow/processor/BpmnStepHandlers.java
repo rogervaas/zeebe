@@ -48,6 +48,7 @@ import io.zeebe.broker.workflow.processor.servicetask.TerminateServiceTaskHandle
 import io.zeebe.broker.workflow.processor.subprocess.TerminateContainedElementsHandler;
 import io.zeebe.broker.workflow.processor.subprocess.TriggerStartEventHandler;
 import io.zeebe.broker.workflow.state.WorkflowState;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
 import java.util.EnumMap;
 import java.util.Map;
@@ -103,12 +104,15 @@ public class BpmnStepHandlers {
 
     // sequence flow
     stepHandlers.put(
-        BpmnStep.ENTER_FLOW_NODE, new StartFlowNodeHandler(WorkflowInstanceIntent.ELEMENT_READY));
+        BpmnStep.ENTER_FLOW_NODE,
+        new StartFlowNodeHandler(WorkflowInstanceIntent.ELEMENT_READY, BpmnElementType.TASK));
     stepHandlers.put(
-        BpmnStep.ENTER_EVENT, new StartFlowNodeHandler(WorkflowInstanceIntent.EVENT_ACTIVATING));
+        BpmnStep.ENTER_EVENT,
+        new StartFlowNodeHandler(WorkflowInstanceIntent.EVENT_ACTIVATING, BpmnElementType.EVENT));
     stepHandlers.put(
         BpmnStep.ACTIVATE_GATEWAY,
-        new StartFlowNodeHandler(WorkflowInstanceIntent.GATEWAY_ACTIVATED));
+        new StartFlowNodeHandler(
+            WorkflowInstanceIntent.GATEWAY_ACTIVATED, BpmnElementType.GATEWAY));
     stepHandlers.put(BpmnStep.PARALLEL_MERGE, new ParallelMergeHandler(workflowState));
   }
 
