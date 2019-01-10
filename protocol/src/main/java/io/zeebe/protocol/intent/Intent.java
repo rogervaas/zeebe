@@ -84,7 +84,10 @@ public interface Intent {
       case SBE_UNKNOWN:
         return Intent.UNKNOWN;
       default:
-        throw new RuntimeException("unknown type");
+        throw new RuntimeException(
+            String.format(
+                "Expected to map value type %s to intent type, but did not recognize the value type",
+                valueType.name()));
     }
   }
 
@@ -120,7 +123,10 @@ public interface Intent {
       case SBE_UNKNOWN:
         return Intent.UNKNOWN;
       default:
-        throw new RuntimeException("unknown type");
+        throw new RuntimeException(
+            String.format(
+                "Expected to map value type %s to intent type, but did not recognize the value type",
+                valueType.name()));
     }
   }
 
