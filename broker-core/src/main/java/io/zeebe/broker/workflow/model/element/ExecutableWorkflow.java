@@ -51,7 +51,10 @@ public class ExecutableWorkflow extends ExecutableFlowElementContainer {
     if (expectedType.isAssignableFrom(element.getClass())) {
       return (T) element;
     } else {
-      throw new RuntimeException("Element is not an instance of " + expectedType.getSimpleName());
+      throw new RuntimeException(
+          String.format(
+              "Expected element %s to be instance of %s, but is %s",
+              id, expectedType.getSimpleName(), element.getClass().getSimpleName()));
     }
   }
 }

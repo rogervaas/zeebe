@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class BpmnYamlParser {
     try {
       return readFromStream(new FileInputStream(file));
     } catch (FileNotFoundException e) {
-      throw new RuntimeException("Failed to read YAML from file", e);
+      throw new RuntimeException("Unexpected error trying to parse BPMN YAML file", e);
     }
   }
 
@@ -57,12 +58,10 @@ public class BpmnYamlParser {
     try {
       definition = mapper.readValue(inputStream, YamlDefinitionImpl.class);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to read YAML model", e);
+      throw new RuntimeException("Unexpected error trying to read BPMN YAML model", e);
     }
 
-    final BpmnModelInstance workflowDefinition = createWorkflow(definition);
-
-    return workflowDefinition;
+    return createWorkflow(definition);
   }
 
   private BpmnModelInstance createWorkflow(final YamlDefinitionImpl definition) {
@@ -91,7 +90,8 @@ public class BpmnYamlParser {
     } else {
       final YamlTask task = tasksById.get(taskId);
       if (task == null) {
-        throw new RuntimeException("No task with id: " + taskId);
+        throw new RuntimeException(
+            String.format("Expected to find task with id %s, but none found", taskId));
       }
 
       builder = addServiceTask(builder, task);
@@ -163,16 +163,16 @@ public class BpmnYamlParser {
 
   private void addInputOutputMappingToTask(YamlTask task, ServiceTaskBuilder serviceTaskBuilder) {
     final String outputBehaviorString = task.getOutputBehavior();
-    ZeebeOutputBehavior outputBehavior = null;
+    final ZeebeOutputBehavior outputBehavior;
     try {
       outputBehavior = ZeebeOutputBehavior.valueOf(outputBehaviorString.toLowerCase());
     } catch (IllegalArgumentException e) {
       throw new RuntimeException(
-          String.format("Invalid output behavior value %s", outputBehaviorString));
+          String.format(
+              "Unexpected output behavior value %s, should be one of: %s",
+              outputBehaviorString, Arrays.toString(ZeebeOutputBehavior.values())));
     }
-    if (outputBehavior != null) {
-      serviceTaskBuilder.zeebeOutputBehavior(outputBehavior);
-    }
+    serviceTaskBuilder.zeebeOutputBehavior(outputBehavior);
 
     for (YamlMapping inputMapping : task.getInputs()) {
       serviceTaskBuilder.zeebeInput(inputMapping.getSource(), inputMapping.getTarget());
