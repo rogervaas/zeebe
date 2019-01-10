@@ -88,8 +88,7 @@ public class CreateWorkflowInstanceTest {
     assertThat(resp.getKey()).isEqualTo(ExecuteCommandResponseDecoder.keyNullValue());
     assertThat(resp.getPartitionId()).isEqualTo(apiRule.getDefaultPartitionId());
     assertThat(resp.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(resp.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(resp.getRejectionReason()).isEqualTo("Workflow is not deployed");
+    assertThat(resp.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(resp.getValue()).containsEntry(PROP_WORKFLOW_BPMN_PROCESS_ID, "process");
   }
 

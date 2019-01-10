@@ -320,9 +320,6 @@ public class CreateDeploymentTest {
     assertThat(resp.getKey()).isEqualTo(ExecuteCommandResponseDecoder.keyNullValue());
     assertThat(resp.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(resp.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(resp.getRejectionReason())
-        .contains("Resource 'process2.bpmn':")
-        .contains("ERROR: Must have at least one start event");
     assertThat(resp.getIntent()).isEqualTo(DeploymentIntent.CREATE);
   }
 
@@ -344,8 +341,6 @@ public class CreateDeploymentTest {
     assertThat(resp.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(resp.getIntent()).isEqualTo(DeploymentIntent.CREATE);
     assertThat(resp.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(resp.getRejectionReason())
-        .isEqualTo("Deployment doesn't contain a resource to deploy");
   }
 
   @Test
@@ -362,9 +357,6 @@ public class CreateDeploymentTest {
     assertThat(resp.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(resp.getIntent()).isEqualTo(DeploymentIntent.CREATE);
     assertThat(resp.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(resp.getRejectionReason())
-        .contains("Failed to deploy resource 'invalid.bpmn':")
-        .contains("SAXException while parsing input stream");
   }
 
   @Test

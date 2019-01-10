@@ -92,8 +92,6 @@ public class JobUpdateRetriesTest {
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(response.getIntent()).isEqualTo(JobIntent.UPDATE_RETRIES);
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
-    assertThat(response.getRejectionReason())
-        .isEqualTo("Expected to find job with key 123, but no job with given key exist.");
   }
 
   @Test
@@ -112,11 +110,6 @@ public class JobUpdateRetriesTest {
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(response.getIntent()).isEqualTo(JobIntent.UPDATE_RETRIES);
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
-    assertThat(response.getRejectionReason())
-        .isEqualTo(
-            "Expected to find job with key "
-                + jobEvent.getKey()
-                + ", but no job with given key exist.");
   }
 
   @Test
@@ -181,7 +174,6 @@ public class JobUpdateRetriesTest {
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(response.getIntent()).isEqualTo(JobIntent.UPDATE_RETRIES);
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(response.getRejectionReason()).isEqualTo("Job retries must be positive");
   }
 
   @Test
@@ -202,6 +194,5 @@ public class JobUpdateRetriesTest {
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(response.getIntent()).isEqualTo(JobIntent.UPDATE_RETRIES);
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(response.getRejectionReason()).isEqualTo("Job retries must be positive");
   }
 }

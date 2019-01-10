@@ -98,8 +98,6 @@ public class ActivateJobsTest {
 
     // then
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(response.getRejectionReason())
-        .isEqualTo("Job batch amount must be greater than zero, got 0");
   }
 
   @Test
@@ -121,8 +119,6 @@ public class ActivateJobsTest {
 
     // then
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(response.getRejectionReason())
-        .isEqualTo("Job batch timeout must be greater than zero, got 0");
   }
 
   @Test
@@ -144,7 +140,6 @@ public class ActivateJobsTest {
 
     // then
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(response.getRejectionReason()).isEqualTo("Job batch type must not be empty");
   }
 
   @Test
@@ -166,7 +161,6 @@ public class ActivateJobsTest {
 
     // then
     assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
-    assertThat(response.getRejectionReason()).isEqualTo("Job batch worker must not be empty");
   }
 
   @Test
