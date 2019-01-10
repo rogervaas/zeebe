@@ -180,7 +180,7 @@ public class FailJobTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(response.getRejectionReason()).isEqualTo("Job is not currently activated");
     assertThat(response.getIntent()).isEqualTo(JobIntent.FAIL);
   }
@@ -199,7 +199,7 @@ public class FailJobTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_STATE);
     assertThat(response.getRejectionReason()).isEqualTo("Job is not currently activated");
     assertThat(response.getIntent()).isEqualTo(JobIntent.FAIL);
   }
@@ -214,7 +214,7 @@ public class FailJobTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_STATE);
     assertThat(response.getRejectionReason()).isEqualTo("Job is not currently activated");
     assertThat(response.getIntent()).isEqualTo(JobIntent.FAIL);
   }
@@ -233,7 +233,7 @@ public class FailJobTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_STATE);
     assertThat(response.getRejectionReason()).isEqualTo("Job is not currently activated");
     assertThat(response.getIntent()).isEqualTo(JobIntent.FAIL);
   }

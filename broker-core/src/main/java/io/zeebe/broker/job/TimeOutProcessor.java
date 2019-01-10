@@ -25,7 +25,10 @@ import io.zeebe.protocol.impl.record.value.job.JobRecord;
 import io.zeebe.protocol.intent.JobIntent;
 
 public class TimeOutProcessor implements CommandProcessor<JobRecord> {
-
+  public static final String NO_JOB_FOUND_MSG =
+      "Expected to time out job %d, but no such job exists";
+  public static final String NOT_ACTIVATED_MSG =
+      "Expected to time out job %d, but it was not activated yet";
   private final JobState state;
 
   public TimeOutProcessor(JobState state) {
@@ -34,11 +37,21 @@ public class TimeOutProcessor implements CommandProcessor<JobRecord> {
 
   @Override
   public void onCommand(TypedRecord<JobRecord> command, CommandControl<JobRecord> commandControl) {
-    if (state.isInState(command.getKey(), State.ACTIVATED)) {
+    final long jobKey = command.getKey();
+    final JobState.State jobState = state.getState(jobKey);
+
+    if (jobState == State.ACTIVATED) {
       state.timeout(command.getKey(), command.getValue());
       commandControl.accept(JobIntent.TIMED_OUT, command.getValue());
     } else {
-      commandControl.reject(RejectionType.NOT_APPLICABLE, "Job not activated");
+      RejectionType type = RejectionType.INVALID_STATE;
+      String format = NOT_ACTIVATED_MSG;
+      if (jobState == State.NOT_FOUND) {
+        type = RejectionType.NOT_FOUND;
+        format = NO_JOB_FOUND_MSG;
+      }
+
+      commandControl.reject(type, String.format(format, jobKey));
     }
   }
 }

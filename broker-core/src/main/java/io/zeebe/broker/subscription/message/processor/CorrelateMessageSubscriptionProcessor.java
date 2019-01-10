@@ -29,10 +29,13 @@ import io.zeebe.broker.subscription.message.state.MessageSubscription;
 import io.zeebe.broker.subscription.message.state.MessageSubscriptionState;
 import io.zeebe.protocol.clientapi.RejectionType;
 import io.zeebe.protocol.intent.MessageSubscriptionIntent;
+import io.zeebe.util.buffer.BufferUtil;
 import java.util.function.Consumer;
 
 public class CorrelateMessageSubscriptionProcessor
     implements TypedRecordProcessor<MessageSubscriptionRecord> {
+  public static final String NO_SUB_FOUND_MSG =
+      "Expected to correlate subscription for element %d and message %s, but none was found";
 
   private final MessageSubscriptionState subscriptionState;
   private final MessageCorrelator messageCorrelator;
@@ -69,7 +72,12 @@ public class CorrelateMessageSubscriptionProcessor
           record.getKey(), MessageSubscriptionIntent.CORRELATED, subscriptionRecord);
     } else {
       streamWriter.appendRejection(
-          record, RejectionType.NOT_APPLICABLE, "subscription does not exist");
+          record,
+          RejectionType.NOT_FOUND,
+          String.format(
+              NO_SUB_FOUND_MSG,
+              subscriptionRecord.getElementInstanceKey(),
+              BufferUtil.bufferAsString(subscriptionRecord.getMessageName())));
     }
   }
 }

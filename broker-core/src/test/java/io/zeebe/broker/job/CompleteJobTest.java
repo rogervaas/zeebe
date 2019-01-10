@@ -97,7 +97,7 @@ public class CompleteJobTest {
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
     assertThat(response.getIntent()).isEqualTo(JobIntent.COMPLETE);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(response.getRejectionReason()).isEqualTo("Job does not exist");
   }
 
@@ -210,7 +210,7 @@ public class CompleteJobTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(response.getRejectionReason()).isEqualTo("Job does not exist");
     assertThat(response.getIntent()).isEqualTo(JobIntent.COMPLETE);
   }
@@ -229,7 +229,7 @@ public class CompleteJobTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(response.getRejectionReason()).isEqualTo("Job is failed and must be resolved first");
     assertThat(response.getIntent()).isEqualTo(JobIntent.COMPLETE);
   }

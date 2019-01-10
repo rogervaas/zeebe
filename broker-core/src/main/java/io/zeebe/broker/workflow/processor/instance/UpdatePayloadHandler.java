@@ -81,7 +81,11 @@ public class UpdatePayloadHandler implements WorkflowInstanceCommandHandler {
         responseWriter.writeEventOnCommand(
             command.getKey(), WorkflowInstanceIntent.PAYLOAD_UPDATED, value, command);
       } else {
-        commandContext.reject(RejectionType.NOT_APPLICABLE, "Workflow instance is not running");
+        commandContext.reject(
+            RejectionType.NOT_FOUND,
+            String.format(
+                "Expected to update payload of failed element with key %d, but nothing to update was found",
+                command.getKey()));
       }
     }
   }

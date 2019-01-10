@@ -25,9 +25,12 @@ import io.zeebe.broker.subscription.message.data.WorkflowInstanceSubscriptionRec
 import io.zeebe.broker.subscription.message.state.WorkflowInstanceSubscriptionState;
 import io.zeebe.protocol.clientapi.RejectionType;
 import io.zeebe.protocol.intent.WorkflowInstanceSubscriptionIntent;
+import io.zeebe.util.buffer.BufferUtil;
 
 public final class CloseWorkflowInstanceSubscription
     implements TypedRecordProcessor<WorkflowInstanceSubscriptionRecord> {
+  public static final String NO_SUB_FOUND_MSG =
+      "Expected to remove subscription for element %d and message %s, but none was found";
 
   private final WorkflowInstanceSubscriptionState subscriptionState;
 
@@ -53,7 +56,12 @@ public final class CloseWorkflowInstanceSubscription
 
     } else {
       streamWriter.appendRejection(
-          record, RejectionType.NOT_APPLICABLE, "subscription is already closed");
+          record,
+          RejectionType.NOT_FOUND,
+          String.format(
+              NO_SUB_FOUND_MSG,
+              subscription.getElementInstanceKey(),
+              BufferUtil.bufferAsString(subscription.getMessageName())));
     }
   }
 }

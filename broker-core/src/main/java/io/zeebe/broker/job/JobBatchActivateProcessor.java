@@ -190,19 +190,21 @@ public class JobBatchActivateProcessor implements TypedRecordProcessor<JobBatchR
     final JobBatchRecord value = record.getValue();
 
     if (value.getAmount() < 1) {
-      rejectionType = RejectionType.BAD_VALUE;
-      rejectionReason = "Job batch amount must be greater than zero, got " + value.getAmount();
+      rejectionType = RejectionType.INVALID_ARGUMENT;
+      rejectionReason =
+          "Expected batch amount to be greater than zero, but received " + value.getAmount();
     } else if (value.getTimeout() < 1) {
-      rejectionType = RejectionType.BAD_VALUE;
-      rejectionReason = "Job batch timeout must be greater than zero, got " + value.getTimeout();
+      rejectionType = RejectionType.INVALID_ARGUMENT;
+      rejectionReason =
+          "Expected batch timeout to be greater than zero, but received " + value.getTimeout();
     } else if (value.getType().capacity() < 1) {
-      rejectionType = RejectionType.BAD_VALUE;
-      rejectionReason = "Job batch type must not be empty";
+      rejectionType = RejectionType.INVALID_ARGUMENT;
+      rejectionReason = "Expected a job type, but received nothing";
     } else if (value.getWorker().capacity() < 1) {
-      rejectionType = RejectionType.BAD_VALUE;
-      rejectionReason = "Job batch worker must not be empty";
+      rejectionType = RejectionType.INVALID_ARGUMENT;
+      rejectionReason = "Expected a job worker, but received nothing";
     } else {
-      throw new IllegalStateException("Job batch command is valid and should not be rejected");
+      throw new IllegalStateException("Expected batch to be invalid but it appears to be valid");
     }
 
     streamWriter.appendRejection(record, rejectionType, rejectionReason);

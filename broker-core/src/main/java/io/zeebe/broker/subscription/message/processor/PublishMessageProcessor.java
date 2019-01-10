@@ -79,12 +79,12 @@ public class PublishMessageProcessor implements TypedRecordProcessor<MessageReco
             messageRecord.getMessageId())) {
       final String rejectionReason =
           String.format(
-              "message with id '%s' is already published",
+              "Expected to publish new message with id '%s', but it is already published",
               bufferAsString(messageRecord.getMessageId()));
 
-      streamWriter.appendRejection(command, RejectionType.BAD_VALUE, rejectionReason);
-      responseWriter.writeRejectionOnCommand(command, RejectionType.BAD_VALUE, rejectionReason);
-
+      streamWriter.appendRejection(command, RejectionType.ALREADY_EXISTS, rejectionReason);
+      responseWriter.writeRejectionOnCommand(
+          command, RejectionType.ALREADY_EXISTS, rejectionReason);
     } else {
       handleNewMessage(command, responseWriter, streamWriter, sideEffect);
     }

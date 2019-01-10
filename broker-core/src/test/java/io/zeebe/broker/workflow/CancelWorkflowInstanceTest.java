@@ -148,7 +148,7 @@ public class CancelWorkflowInstanceTest {
 
     // then
     assertThat(response.getIntent()).isEqualTo(CANCEL);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.INVALID_ARGUMENT);
     assertThat(response.getRejectionReason())
         .isEqualTo(
             "Expected to find a workflow instance with key "
@@ -306,7 +306,7 @@ public class CancelWorkflowInstanceTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(response.getRejectionReason())
         .isEqualTo(
             "Expected to find a running workflow instance with key -1, but found no workflow instance.");
@@ -338,7 +338,7 @@ public class CancelWorkflowInstanceTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(response.getRejectionReason())
         .isEqualTo(
             "Expected to find a running workflow instance with key "
@@ -371,7 +371,7 @@ public class CancelWorkflowInstanceTest {
 
     // then
     assertThat(response.getRecordType()).isEqualTo(RecordType.COMMAND_REJECTION);
-    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_APPLICABLE);
+    assertThat(response.getRejectionType()).isEqualTo(RejectionType.NOT_FOUND);
     assertThat(response.getRejectionReason())
         .isEqualTo(
             "Expected to find a running workflow instance with key "

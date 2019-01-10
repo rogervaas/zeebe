@@ -17,6 +17,7 @@
  */
 package io.zeebe.broker.job;
 
+import io.zeebe.broker.incident.processor.IncidentState;
 import io.zeebe.broker.logstreams.processor.TypedEventStreamProcessorBuilder;
 import io.zeebe.broker.logstreams.state.ZeebeState;
 import io.zeebe.broker.workflow.processor.job.JobCompletedEventProcessor;
@@ -31,12 +32,14 @@ public class JobEventProcessors {
       TypedEventStreamProcessorBuilder typedEventStreamProcessorBuilder, ZeebeState zeebeState) {
     final WorkflowState workflowState = zeebeState.getWorkflowState();
     final JobState jobState = zeebeState.getJobState();
+    final IncidentState incidentState = zeebeState.getIncidentState();
 
     typedEventStreamProcessorBuilder
         .onEvent(ValueType.JOB, JobIntent.CREATED, new JobCreatedProcessor(workflowState))
         .onEvent(ValueType.JOB, JobIntent.COMPLETED, new JobCompletedEventProcessor(workflowState))
         .onCommand(ValueType.JOB, JobIntent.CREATE, new CreateProcessor(jobState))
-        .onCommand(ValueType.JOB, JobIntent.COMPLETE, new CompleteProcessor(jobState))
+        .onCommand(
+            ValueType.JOB, JobIntent.COMPLETE, new CompleteProcessor(jobState, incidentState))
         .onCommand(ValueType.JOB, JobIntent.FAIL, new FailProcessor(jobState))
         .onEvent(ValueType.JOB, JobIntent.FAILED, new JobFailedProcessor())
         .onCommand(ValueType.JOB, JobIntent.TIME_OUT, new TimeOutProcessor(jobState))

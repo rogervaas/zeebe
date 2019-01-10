@@ -28,6 +28,9 @@ import io.zeebe.protocol.clientapi.RejectionType;
 import io.zeebe.protocol.intent.TimerIntent;
 
 public class CancelTimerProcessor implements TypedRecordProcessor<TimerRecord> {
+
+  public static final String NO_TIMER_FOUND_MSG =
+      "Expected to cancel timer with key %d, but it does not exist";
   private final WorkflowState workflowState;
 
   public CancelTimerProcessor(final WorkflowState workflowState) {
@@ -45,7 +48,7 @@ public class CancelTimerProcessor implements TypedRecordProcessor<TimerRecord> {
 
     if (timerInstance == null) {
       streamWriter.appendRejection(
-          record, RejectionType.NOT_APPLICABLE, "timer is already triggered or canceled");
+          record, RejectionType.NOT_FOUND, String.format(NO_TIMER_FOUND_MSG, record.getKey()));
     } else {
       streamWriter.appendFollowUpEvent(record.getKey(), TimerIntent.CANCELED, timer);
       workflowState.getTimerState().remove(timerInstance);

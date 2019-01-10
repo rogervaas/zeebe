@@ -77,11 +77,18 @@ public class CreateWorkflowInstanceHandler implements WorkflowInstanceCommandHan
       if (handlerId != null && handlerId.capacity() != 0) {
         createDeferredStartEvent(
             handlerId, createWorkflowCommand, workflowInstanceKey, eventOutput);
-      } else if (startEvents.size() > 1
-          || (startEvents.size() == 1 && !startEvents.get(0).isNone())) {
+      } else if (startEvents.size() > 1) {
         commandContext.reject(
-            RejectionType.NOT_APPLICABLE,
-            "Can't manually instantiate workflow with start events of types other than none");
+            RejectionType.INVALID_ARGUMENT,
+            String.format(
+                "Failed to start workflow %d, cannot manually start workflows with multiple start events",
+                command.getWorkflowKey()));
+      } else if ((startEvents.size() == 1 && !startEvents.get(0).isNone())) {
+        commandContext.reject(
+            RejectionType.INVALID_ARGUMENT,
+            String.format(
+                "Failed to start workflow %d, cannot manually start workflows without a NONE start event",
+                command.getWorkflowKey()));
       }
 
       state
@@ -92,7 +99,11 @@ public class CreateWorkflowInstanceHandler implements WorkflowInstanceCommandHan
       responseWriter.writeEventOnCommand(
           workflowInstanceKey, WorkflowInstanceIntent.ELEMENT_READY, createWorkflowCommand, record);
     } else {
-      commandContext.reject(RejectionType.BAD_VALUE, "Workflow is not deployed");
+      commandContext.reject(
+          RejectionType.NOT_FOUND,
+          String.format(
+              "Expected to deploy workflow with key %d, but no such workflow was found",
+              command.getWorkflowKey()));
     }
   }
 

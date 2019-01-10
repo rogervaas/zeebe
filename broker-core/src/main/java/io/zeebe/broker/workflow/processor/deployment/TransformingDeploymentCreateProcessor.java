@@ -69,10 +69,10 @@ public class TransformingDeploymentCreateProcessor
         createTimerIfTimerStartEvent(command, streamWriter);
       } else {
         // should not be possible
-        responseWriter.writeRejectionOnCommand(
-            command, RejectionType.NOT_APPLICABLE, "Deployment already exist");
-        streamWriter.appendRejection(
-            command, RejectionType.NOT_APPLICABLE, "Deployment already exist");
+        final String reason =
+            String.format("Expected to create a new deployment %d, but it already exists", key);
+        responseWriter.writeRejectionOnCommand(command, RejectionType.ALREADY_EXISTS, reason);
+        streamWriter.appendRejection(command, RejectionType.ALREADY_EXISTS, reason);
       }
     } else {
       responseWriter.writeRejectionOnCommand(

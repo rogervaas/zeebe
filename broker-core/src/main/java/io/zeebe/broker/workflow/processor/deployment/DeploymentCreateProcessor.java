@@ -44,7 +44,11 @@ public class DeploymentCreateProcessor implements TypedRecordProcessor<Deploymen
     if (workflowState.putDeployment(event.getKey(), deploymentEvent)) {
       streamWriter.appendFollowUpEvent(event.getKey(), DeploymentIntent.CREATED, deploymentEvent);
     } else {
-      streamWriter.appendRejection(event, RejectionType.NOT_APPLICABLE, "Deployment already exist");
+      streamWriter.appendRejection(
+          event,
+          RejectionType.ALREADY_EXISTS,
+          String.format(
+              "Expected to create a new deployment %d, but it already exists", event.getKey()));
     }
   }
 }

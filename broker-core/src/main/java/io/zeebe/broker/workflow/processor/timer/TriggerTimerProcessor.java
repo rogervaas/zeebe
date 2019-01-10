@@ -42,6 +42,10 @@ import org.agrona.DirectBuffer;
 
 public class TriggerTimerProcessor implements TypedRecordProcessor<TimerRecord> {
 
+  public static final String NO_TIMER_FOUND_MSG =
+      "Expected to trigger timer with key %d, but it does not exist";
+  public static final String NO_EVENT_OCCURRED_MSG =
+      "Expected to trigger an event after triggering a timer with key %d, but nothing occurred";
   private final CatchEventBehavior catchEventBehavior;
   private final WorkflowState workflowState;
 
@@ -63,7 +67,7 @@ public class TriggerTimerProcessor implements TypedRecordProcessor<TimerRecord> 
         workflowState.getTimerState().get(elementInstanceKey, record.getKey());
     if (timerInstance == null) {
       streamWriter.appendRejection(
-          record, RejectionType.NOT_APPLICABLE, "timer is already triggered or canceled");
+          record, RejectionType.NOT_FOUND, String.format(NO_TIMER_FOUND_MSG, record.getKey()));
       return;
     }
 
@@ -95,7 +99,9 @@ public class TriggerTimerProcessor implements TypedRecordProcessor<TimerRecord> 
       }
     } else {
       streamWriter.appendRejection(
-          record, RejectionType.NOT_APPLICABLE, "activity is not active anymore");
+          record,
+          RejectionType.INVALID_STATE,
+          String.format(NO_EVENT_OCCURRED_MSG, record.getKey()));
     }
   }
 

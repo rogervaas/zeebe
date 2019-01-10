@@ -25,6 +25,7 @@ import io.zeebe.protocol.intent.JobIntent;
 
 public class CancelProcessor implements CommandProcessor<JobRecord> {
 
+  public static final String NO_JOB_FOUND_MSG = "Expected to cancel job %d, but no such job exists";
   private final JobState state;
 
   public CancelProcessor(JobState state) {
@@ -41,7 +42,8 @@ public class CancelProcessor implements CommandProcessor<JobRecord> {
       commandControl.accept(JobIntent.CANCELED, job);
 
     } else {
-      commandControl.reject(RejectionType.NOT_APPLICABLE, "Job does not exist");
+      commandControl.reject(
+          RejectionType.INVALID_ARGUMENT, String.format(NO_JOB_FOUND_MSG, jobKey));
     }
   }
 }

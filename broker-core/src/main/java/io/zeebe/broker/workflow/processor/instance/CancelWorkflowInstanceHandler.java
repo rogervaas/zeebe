@@ -55,12 +55,12 @@ public class CancelWorkflowInstanceHandler implements WorkflowInstanceCommandHan
                 command.getKey(), WorkflowInstanceIntent.ELEMENT_TERMINATING, value, command);
       } else {
         commandContext.reject(
-            RejectionType.NOT_APPLICABLE,
+            RejectionType.INVALID_ARGUMENT,
             String.format(ERROR_MSG_CHILD_INSTANCE, command.getKey()));
       }
     } else {
       commandContext.reject(
-          RejectionType.NOT_APPLICABLE, String.format(ERROR_MSG_NOT_FOUND, command.getKey()));
+          RejectionType.NOT_FOUND, String.format(ERROR_MSG_NOT_FOUND, command.getKey()));
     }
   }
 }

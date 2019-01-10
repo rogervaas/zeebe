@@ -17,18 +17,31 @@
  */
 package io.zeebe.broker.job;
 
+import io.zeebe.broker.Loggers;
+import io.zeebe.broker.incident.processor.IncidentState;
 import io.zeebe.broker.job.JobState.State;
 import io.zeebe.broker.logstreams.processor.CommandProcessor;
 import io.zeebe.broker.logstreams.processor.TypedRecord;
 import io.zeebe.protocol.clientapi.RejectionType;
 import io.zeebe.protocol.impl.record.value.job.JobRecord;
 import io.zeebe.protocol.intent.JobIntent;
+import org.slf4j.Logger;
 
 public class CompleteProcessor implements CommandProcessor<JobRecord> {
-  private final JobState state;
+  public static final String NO_JOB_FOUND_MSG =
+      "Expected to complete job %d, but no such job exists";
+  public static final String NO_FAILED_JOB_MSG =
+      "Expected to complete job %d, but the job is failed; incident %d must be resolved first";
+  public static final String CORRUPT_STATE_MSG =
+      "Expected to complete job %d, but the job is failed; no incident was created, an internal error was raised";
+  private static final Logger LOG = Loggers.WORKFLOW_PROCESSOR_LOGGER;
 
-  public CompleteProcessor(JobState state) {
+  private final JobState state;
+  private final IncidentState incidentState;
+
+  public CompleteProcessor(JobState state, IncidentState incidentState) {
     this.state = state;
+    this.incidentState = incidentState;
   }
 
   @Override
@@ -44,11 +57,19 @@ public class CompleteProcessor implements CommandProcessor<JobRecord> {
         state.delete(jobKey, job);
         commandControl.accept(JobIntent.COMPLETED, job);
       } else {
-        commandControl.reject(
-            RejectionType.NOT_APPLICABLE, "Job is failed and must be resolved first");
+        final long incidentKey = incidentState.getJobIncidentKey(jobKey);
+        if (incidentKey == IncidentState.MISSING_INCIDENT) {
+          final String errorMessage = String.format(CORRUPT_STATE_MSG, jobKey);
+          LOG.error(errorMessage);
+
+          commandControl.reject(RejectionType.INVALID_STATE, errorMessage);
+        } else {
+          commandControl.reject(
+              RejectionType.INVALID_STATE, String.format(NO_FAILED_JOB_MSG, jobKey, incidentKey));
+        }
       }
     } else {
-      commandControl.reject(RejectionType.NOT_APPLICABLE, "Job does not exist");
+      commandControl.reject(RejectionType.NOT_FOUND, String.format(NO_JOB_FOUND_MSG, jobKey));
     }
   }
 }

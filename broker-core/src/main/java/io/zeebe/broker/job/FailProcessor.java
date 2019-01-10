@@ -25,6 +25,9 @@ import io.zeebe.protocol.impl.record.value.job.JobRecord;
 import io.zeebe.protocol.intent.JobIntent;
 
 public class FailProcessor implements CommandProcessor<JobRecord> {
+  public static final String NO_JOB_FOUND_MSG = "Expected to fail job %d, but no such job exists";
+  public static final String NOT_ACTIVATED_MSG =
+      "Expected to fail job %d, but it was not activated yet";
   private final JobState state;
 
   public FailProcessor(JobState state) {
@@ -33,10 +36,10 @@ public class FailProcessor implements CommandProcessor<JobRecord> {
 
   @Override
   public void onCommand(TypedRecord<JobRecord> command, CommandControl<JobRecord> commandControl) {
-
     final long key = command.getKey();
+    final JobState.State jobState = state.getState(key);
 
-    if (state.isInState(key, State.ACTIVATED)) {
+    if (jobState == State.ACTIVATED) {
       final JobRecord failedJob = state.getJob(key);
       failedJob.setRetries(command.getValue().getRetries());
       failedJob.setErrorMessage(command.getValue().getErrorMessage());
@@ -44,7 +47,14 @@ public class FailProcessor implements CommandProcessor<JobRecord> {
 
       commandControl.accept(JobIntent.FAILED, failedJob);
     } else {
-      commandControl.reject(RejectionType.NOT_APPLICABLE, "Job is not currently activated");
+      RejectionType type = RejectionType.INVALID_STATE;
+      String format = NOT_ACTIVATED_MSG;
+      if (jobState == State.NOT_FOUND) {
+        type = RejectionType.NOT_FOUND;
+        format = NO_JOB_FOUND_MSG;
+      }
+
+      commandControl.reject(type, String.format(format, key));
     }
   }
 }

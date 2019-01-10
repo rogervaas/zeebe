@@ -30,10 +30,10 @@ import io.zeebe.protocol.intent.IncidentIntent;
 
 public final class CreateIncidentProcessor implements CommandProcessor<IncidentRecord> {
 
-  public static final String CORRUPTED_STATE_EXCEPTION =
-      "Expected to have an failed token, but no entry with key %d found.";
-  public static final String NOT_FAILED_JOB_MSG =
-      "Expected to have an job with key %d in failed state.";
+  public static final String NO_FAILED_EVENT_MSG =
+      "Expected to have a failed event %d, but none was found";
+  public static final String NO_FAILED_JOB_MSG =
+      "Expected job %d to be in failed state, but it was %s";
 
   private final ZeebeState zeebeState;
 
@@ -68,13 +68,23 @@ public final class CreateIncidentProcessor implements CommandProcessor<IncidentR
   }
 
   private boolean rejectJobIncident(long jobKey, CommandControl<IncidentRecord> commandControl) {
-    final JobState jobState = zeebeState.getJobState();
-    final boolean isNotFailed = !jobState.isInState(jobKey, State.FAILED);
-    if (isNotFailed) {
-      commandControl.reject(
-          RejectionType.NOT_APPLICABLE, String.format(NOT_FAILED_JOB_MSG, jobKey));
+    final JobState state = zeebeState.getJobState();
+    final JobState.State jobState = state.getState(jobKey);
+
+    if (jobState != State.FAILED) {
+      RejectionType type = RejectionType.INVALID_STATE;
+      String stateName = jobState.name();
+
+      if (jobState == State.NOT_FOUND) {
+        type = RejectionType.NOT_FOUND;
+        stateName = "not found";
+      }
+
+      commandControl.reject(type, String.format(NO_FAILED_JOB_MSG, jobKey, stateName));
+      return true;
     }
-    return isNotFailed;
+
+    return false;
   }
 
   private boolean rejectWorkflowInstanceIncident(
@@ -86,9 +96,9 @@ public final class CreateIncidentProcessor implements CommandProcessor<IncidentR
     final boolean noFailedToken = failedToken == null;
     if (noFailedToken) {
       commandControl.reject(
-          RejectionType.NOT_APPLICABLE,
-          String.format(CORRUPTED_STATE_EXCEPTION, elementInstanceKey));
+          RejectionType.NOT_FOUND, String.format(NO_FAILED_EVENT_MSG, elementInstanceKey));
     }
+
     return noFailedToken;
   }
 }
