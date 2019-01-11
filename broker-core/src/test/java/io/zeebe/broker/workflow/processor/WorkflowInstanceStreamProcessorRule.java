@@ -42,6 +42,7 @@ import io.zeebe.broker.workflow.state.WorkflowState;
 import io.zeebe.model.bpmn.Bpmn;
 import io.zeebe.model.bpmn.BpmnModelInstance;
 import io.zeebe.model.bpmn.instance.Process;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.deployment.DeploymentRecord;
 import io.zeebe.protocol.impl.record.value.deployment.ResourceType;
 import io.zeebe.protocol.impl.record.value.job.JobRecord;
@@ -161,7 +162,7 @@ public class WorkflowInstanceStreamProcessorRule extends ExternalResource {
       final String processId, final DirectBuffer payload) {
     environmentRule.writeCommand(
         WorkflowInstanceIntent.CREATE,
-        workflowInstanceRecord(BufferUtil.wrapString(processId), payload));
+        workflowInstanceRecord(BufferUtil.wrapString(processId), payload, BpmnElementType.PROCESS));
     final TypedRecord<WorkflowInstanceRecord> createdEvent =
         awaitAndGetFirstRecordInState(WorkflowInstanceIntent.ELEMENT_READY);
     return createdEvent;
@@ -175,11 +176,12 @@ public class WorkflowInstanceStreamProcessorRule extends ExternalResource {
   }
 
   private static WorkflowInstanceRecord workflowInstanceRecord(
-      final DirectBuffer processId, final DirectBuffer payload) {
+      final DirectBuffer processId, final DirectBuffer payload, final BpmnElementType elementType) {
     final WorkflowInstanceRecord record = new WorkflowInstanceRecord();
 
     record.setBpmnProcessId(processId);
     record.setPayload(payload);
+    record.setBpmnElementType(elementType);
 
     return record;
   }

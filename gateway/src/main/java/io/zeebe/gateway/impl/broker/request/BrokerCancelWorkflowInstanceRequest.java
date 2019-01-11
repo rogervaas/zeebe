@@ -15,6 +15,7 @@
  */
 package io.zeebe.gateway.impl.broker.request;
 
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.clientapi.ValueType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
@@ -27,6 +28,7 @@ public class BrokerCancelWorkflowInstanceRequest
 
   public BrokerCancelWorkflowInstanceRequest() {
     super(ValueType.WORKFLOW_INSTANCE, WorkflowInstanceIntent.CANCEL);
+    requestDto.setBpmnElementType(BpmnElementType.PROCESS);
   }
 
   public BrokerCancelWorkflowInstanceRequest setWorkflowInstanceKey(long workflowInstanceKey) {

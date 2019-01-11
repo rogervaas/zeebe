@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import io.zeebe.broker.logstreams.processor.TypedRecord;
 import io.zeebe.broker.logstreams.state.ZeebeState;
 import io.zeebe.broker.util.ZeebeStateRule;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.RecordMetadata;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
@@ -497,6 +498,7 @@ public class ElementInstanceStateVariablesTest {
 
   private WorkflowInstanceRecord createWorkflowInstanceRecord(long parentKey) {
     final WorkflowInstanceRecord workflowInstanceRecord = new WorkflowInstanceRecord();
+    workflowInstanceRecord.setBpmnElementType(BpmnElementType.PROCESS);
 
     if (parentKey >= 0) {
       workflowInstanceRecord.setScopeInstanceKey(parentKey);

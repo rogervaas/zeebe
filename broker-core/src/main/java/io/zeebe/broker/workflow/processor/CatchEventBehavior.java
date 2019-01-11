@@ -38,6 +38,7 @@ import io.zeebe.model.bpmn.util.time.Timer;
 import io.zeebe.msgpack.query.MsgPackQueryProcessor;
 import io.zeebe.msgpack.query.MsgPackQueryProcessor.QueryResult;
 import io.zeebe.msgpack.query.MsgPackQueryProcessor.QueryResults;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.TimerIntent;
 import io.zeebe.protocol.intent.WorkflowInstanceIntent;
@@ -133,6 +134,7 @@ public class CatchEventBehavior {
       workflowInstanceRecord.wrap(source);
       workflowInstanceRecord.setPayload(eventPayload);
       workflowInstanceRecord.setElementId(eventHandlerId);
+      workflowInstanceRecord.setBpmnElementType(BpmnElementType.EVENT);
 
       streamWriter.appendFollowUpEvent(
           elementInstanceKey, WorkflowInstanceIntent.EVENT_OCCURRED, workflowInstanceRecord);

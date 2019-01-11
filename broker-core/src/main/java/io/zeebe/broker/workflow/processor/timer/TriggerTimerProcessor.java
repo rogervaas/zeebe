@@ -34,6 +34,7 @@ import io.zeebe.broker.workflow.state.ElementInstance;
 import io.zeebe.broker.workflow.state.TimerInstance;
 import io.zeebe.broker.workflow.state.WorkflowState;
 import io.zeebe.model.bpmn.util.time.RepeatingInterval;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.clientapi.RejectionType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.intent.TimerIntent;
@@ -79,6 +80,7 @@ public class TriggerTimerProcessor implements TypedRecordProcessor<TimerRecord> 
       startEventRecord
           .setWorkflowKey(timer.getWorkflowKey())
           .setElementId(timer.getHandlerNodeId())
+          .setBpmnElementType(BpmnElementType.EVENT)
           .setPayload(WorkflowInstanceRecord.EMPTY_PAYLOAD);
       streamWriter.appendNewEvent(WorkflowInstanceIntent.EVENT_OCCURRED, startEventRecord);
 

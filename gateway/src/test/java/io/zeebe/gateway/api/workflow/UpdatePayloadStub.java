@@ -19,6 +19,7 @@ import io.zeebe.gateway.api.util.StubbedGateway;
 import io.zeebe.gateway.api.util.StubbedGateway.RequestStub;
 import io.zeebe.gateway.impl.broker.request.BrokerUpdateWorkflowInstancePayloadRequest;
 import io.zeebe.gateway.impl.broker.response.BrokerResponse;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 
 public class UpdatePayloadStub
@@ -33,7 +34,9 @@ public class UpdatePayloadStub
   @Override
   public BrokerResponse<WorkflowInstanceRecord> handle(
       BrokerUpdateWorkflowInstancePayloadRequest request) throws Exception {
-    return new BrokerResponse<>(
-        new WorkflowInstanceRecord(), request.getPartitionId(), request.getKey());
+    final WorkflowInstanceRecord instanceRecord = new WorkflowInstanceRecord();
+    instanceRecord.setBpmnElementType(BpmnElementType.PROCESS);
+
+    return new BrokerResponse<>(instanceRecord, request.getPartitionId(), request.getKey());
   }
 }

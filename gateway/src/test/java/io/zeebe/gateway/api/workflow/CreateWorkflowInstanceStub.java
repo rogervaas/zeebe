@@ -19,6 +19,7 @@ import io.zeebe.gateway.api.util.StubbedGateway;
 import io.zeebe.gateway.api.util.StubbedGateway.RequestStub;
 import io.zeebe.gateway.impl.broker.request.BrokerCreateWorkflowInstanceRequest;
 import io.zeebe.gateway.impl.broker.response.BrokerResponse;
+import io.zeebe.protocol.BpmnElementType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 
 public class CreateWorkflowInstanceStub
@@ -62,6 +63,7 @@ public class CreateWorkflowInstanceStub
     response.setScopeInstanceKey(-1);
     response.setVersion(PROCESS_VERSION);
     response.setWorkflowKey(WORKFLOW_KEY);
+    response.setBpmnElementType(BpmnElementType.PROCESS);
 
     return new BrokerResponse<>(response, 0, WORKFLOW_INSTANCE_KEY);
   }

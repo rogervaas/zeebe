@@ -52,7 +52,7 @@ public class WorkflowInstanceRecord extends UnpackedObject {
   private final LongProperty scopeInstanceKeyProp = new LongProperty(PROP_WORKFLOW_SCOPE_KEY, -1L);
 
   private final EnumProperty<BpmnElementType> bpmnElementTypeProp =
-      new EnumProperty(PROP_WORKFLOW_BPMN_TYPE, BpmnElementType.class, BpmnElementType.PROCESS);
+      new EnumProperty(PROP_WORKFLOW_BPMN_TYPE, BpmnElementType.class);
 
   public WorkflowInstanceRecord() {
     this.declareProperty(bpmnProcessIdProp)
